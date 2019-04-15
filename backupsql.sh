@@ -7,8 +7,13 @@
 PASSWORD=pass #pass mysql root
 USER=login #user mysql
 DATE=`date +%d-%m-%Y` #date
-BACKUPDIR=/home/user123/mybackup/sql/
-TEMPDIR=/var/backup/sql_$DATE/
+BACKUPDIR=/home/user123/mybackup/sql
+TEMPDIR=/var/backuper/sql_$DATE
+COMPRESSED_FILE_FULL_PATH=$BACKUPDIR/linode_backup_sql_$DATE.tar.gz
+##Yandex Disk Data
+YANDEX_FILENAME=$COMPRESSED_FILE_FULL_PATH
+YANDEX_LOGIN=login
+YANDEX_PASS=pass
 ###########################################
 
 #optimize all databases
@@ -48,7 +53,10 @@ if ! [ -d $BACKUPDIR ]; then   ##if the directory does not exist
 	mkdir -p $BACKUPDIR
 fi
 
-tar -P -czvf  $BACKUPDIR/linode_backup_sql_$DATE.tar.gz  $TEMPDIR
+tar -P -czvf  $COMPRESSED_FILE_FULL_PATH  $TEMPDIR
+
+echo -e "\nCompress done\nStart Upload to Yandex Disk\n"
+curl -T $YANDEX_FILENAME https://webdav.yandex.ru/mysqlbackups/linode/ --user $YANDEX_LOGIN:$YANDEX_PASS --progress-bar -o /dev/null
 
 #cancel, delete temp files
 rm -f /tmp/tempdatabases.list /tmp/stoplist.txt /tmp/alldatabases.list $TEMPDIR/*
